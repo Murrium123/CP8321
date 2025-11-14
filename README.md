@@ -11,13 +11,44 @@ Reference implementation for the SICAPv2 end-to-end pipeline described in `p4_en
   ```
   Feel free to run these inside a virtual environment (e.g., `python -m venv .venv && source .venv/bin/activate`).
 
+## Dataset Preparation
+
+### 1. Download the SICAPv2 Dataset
+- Download the SICAPv2 dataset from Mendeley Data: https://data.mendeley.com/datasets/9xxm58dvs3/1
+- Extract the downloaded archive to a location of your choice (e.g., `./SICAPv2`)
+- The dataset should contain:
+  - An `images/` folder with all the patch images
+  - A `partition/` folder with train/test/validation Excel files
+
+### 2. Organize the Dataset
+- Before running the pipeline, you need to organize the dataset into the expected folder structure (train/valid/test with class subdirectories).
+- Edit `organize_sicapv2_data.py` to update the paths if needed:
+  - `SICAP_ROOT`: Path to your extracted SICAPv2 folder
+  - `OUTPUT_DIR`: Where you want the organized data (default: `./data`)
+- Run the organization script:
+  ```bash
+  python organize_sicapv2_data.py
+  ```
+- This will create a `data/` folder with the following structure:
+  ```
+  data/
+  ├── train/
+  │   ├── NC/
+  │   ├── G3/
+  │   ├── G4/
+  │   └── G5/
+  ├── valid/
+  │   └── (same structure)
+  └── test/
+      └── (same structure)
+  ```
+
 ## Running the pipeline
-- Make sure your SICAPv2 dataset lives at `path/to/SICAPv2` with `train`, `valid`, and `test` subfolders (each containing `NC`, `G3`, `G4`, `G5` directories).
-- Execute the explained pipeline with default settings:
+- After organizing the dataset (see Dataset Preparation above), execute the explained pipeline with default settings:
   ```bash
   python p4_end2end_explained.py --data-dir data
   ```
-  Swap `--encoder`, `--classifier`, or other CLI flags as needed (see `p4_end2end_explained.py -h`).
+- Swap `--encoder`, `--classifier`, or other CLI flags as needed (see `p4_end2end_explained.py -h` for all options).
 
 ## Notes
 - The script writes metrics to `foundation_results/p4_end2end_metrics.json` by default; adjust `--output-json` if you want a different location.

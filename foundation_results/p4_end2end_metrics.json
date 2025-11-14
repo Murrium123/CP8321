@@ -1,42 +1,42 @@
 {
   "encoder": "facebook/dinov2-base",
   "use_lora": false,
-  "classifier": "linear",
+  "classifier": "mlp",
   "pooling": "cls",
   "epochs": 6,
   "batch_size": 16,
   "test_metrics": {
-    "accuracy": 0.7054665409990575,
-    "precision_macro": 0.6907498704969651,
-    "recall_macro": 0.6331938789484369,
-    "f1_macro": 0.6412152444206463,
-    "kappa_quadratic": 0.6673813715887623,
+    "accuracy": 0.7360980207351555,
+    "precision_macro": 0.7189699864054099,
+    "recall_macro": 0.7058240702079511,
+    "f1_macro": 0.7008245614023232,
+    "kappa_quadratic": 0.7543313045316036,
     "confusion_matrix": [
       [
-        606,
-        24,
-        12,
-        2
+        589,
+        44,
+        7,
+        4
       ],
       [
-        99,
-        225,
-        62,
-        7
+        57,
+        299,
+        31,
+        6
       ],
       [
-        138,
-        96,
-        590,
-        29
+        80,
+        175,
+        560,
+        38
       ],
       [
-        47,
-        0,
-        109,
-        76
+        21,
+        9,
+        88,
+        114
       ]
     ],
-    "auc_weighted": 0.8943837415367437
+    "auc_weighted": 0.9152343292048395
   }
 }
