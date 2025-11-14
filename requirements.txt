@@ -1,0 +1,7 @@
+numpy>=1.24
+scikit-learn>=1.4
+torch>=2.2
+pillow>=10.0
+transformers>=4.39
+huggingface-hub>=0.23
+peft>=0.10
