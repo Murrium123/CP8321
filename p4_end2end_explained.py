@@ -139,6 +139,10 @@ class Backbone:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self.pooling = pooling
         self.model = load_auto_model(checkpoint).to(self.device)
+
+        # Check if this is a timm model (doesn't have .config attribute)
+        self.is_timm_model = not hasattr(self.model, "config")
+
         self.use_lora = bool(use_lora and get_peft_model is not None and LoraConfig is not None)
         if self.use_lora:
             resolved_targets = self._resolve_target_modules(checkpoint, target_modules)
@@ -158,31 +162,51 @@ class Backbone:
         if not self.use_lora:
             for p in self.model.parameters():
                 p.requires_grad = False
-        self.hidden_size = getattr(
-            self.model.config, "hidden_size", getattr(self.model.config, "embed_dim", getattr(self.model.config, "num_features", None))
-        )
-        if self.hidden_size is None and hasattr(self.model, "num_features"):
-            self.hidden_size = self.model.num_features
+
+        # Determine hidden size
+        if self.is_timm_model:
+            # For timm models, use num_features or embed_dim
+            self.hidden_size = getattr(self.model, "num_features", getattr(self.model, "embed_dim", None))
+        else:
+            # For HF transformers models
+            self.hidden_size = getattr(
+                self.model.config, "hidden_size", getattr(self.model.config, "embed_dim", getattr(self.model.config, "num_features", None))
+            )
+            if self.hidden_size is None and hasattr(self.model, "num_features"):
+                self.hidden_size = self.model.num_features
+
         if self.hidden_size is None:
             with torch.no_grad():
                 dummy = torch.zeros(1, 3, IMAGE_SIZE, IMAGE_SIZE).to(self.device)
-                outputs = self.model(pixel_values=dummy)
-                self.hidden_size = outputs.last_hidden_state.shape[-1]
+                if self.is_timm_model:
+                    outputs = self.model.forward_features(dummy)
+                else:
+                    outputs = self.model(pixel_values=dummy)
+                    outputs = outputs.last_hidden_state
+                self.hidden_size = outputs.shape[-1]
 
     def forward(self, pixel_values: torch.Tensor) -> torch.Tensor:
-        outputs = self.model(pixel_values=pixel_values)
-        hidden = outputs.last_hidden_state
-        if self.pooling == "mean":
-            return hidden.mean(dim=1)
-        return hidden[:, 0, :]
+        if self.is_timm_model:
+            # Timm models use forward_features to get hidden states
+            hidden = self.model.forward_features(pixel_values)
+            if self.pooling == "mean":
+                return hidden.mean(dim=1)
+            return hidden[:, 0, :]
+        else:
+            # HuggingFace transformers models
+            outputs = self.model(pixel_values=pixel_values)
+            hidden = outputs.last_hidden_state
+            if self.pooling == "mean":
+                return hidden.mean(dim=1)
+            return hidden[:, 0, :]
 
     @staticmethod
     def _resolve_target_modules(checkpoint: str, target_modules: Sequence[str]) -> List[str]:
         if target_modules and target_modules != ["auto"]:
             return list(target_modules)
         ckpt = checkpoint.lower()
-        if "uni" in ckpt or ckpt.endswith("model") or "timm" in ckpt or checkpoint.startswith("/"):
-            log("Auto-selecting LoRA targets for timm/UNI backbone: ['qkv', 'proj']")
+        if "uni" in ckpt or "virchow" in ckpt or ckpt.endswith("model") or "timm" in ckpt or checkpoint.startswith("/"):
+            log("Auto-selecting LoRA targets for timm/UNI/Virchow2 backbone: ['qkv', 'proj']")
             return ["qkv", "proj"]
         log("Auto-selecting LoRA targets for transformer backbone: ['query', 'key', 'value']")
         return ["query", "key", "value"]
@@ -297,7 +321,8 @@ def main():
     """
 
     parser = argparse.ArgumentParser(description="End-to-end SICAPv2 classification with foundation models.")
-    parser.add_argument("--data-dir", type=str, default="data", help="Folder containing train/valid/test subdirectories.")
+    parser.add_argument("--data-dir", type=str, default="data", help="Folder containing train/valid subdirectories.")
+    parser.add_argument("--test-dir", type=str, default=None, help="Optional separate test directory. If not provided, uses data-dir/test.")
     parser.add_argument(
         "--encoder",
         type=str,
@@ -308,6 +333,7 @@ def main():
             "owkin/phikon",
             "ikim-uk-essen/BiomedCLIP_ViT_patch16_224",
             "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+            "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
         ],
         help="Choose which foundation model checkpoint to use (HF repo id or local path).",
     )
@@ -338,7 +364,10 @@ def main():
     data_root = Path(args.data_dir)
     train_items = load_split(data_root / "train")
     valid_items = load_split(data_root / "valid")
-    test_items = load_split(data_root / "test")
+
+    # Use separate test directory if provided, otherwise default to data_root/test
+    test_root = Path(args.test_dir) if args.test_dir else data_root / "test"
+    test_items = load_split(test_root)
     log(f"Loaded SICAPv2 splits: {len(train_items)} train / {len(valid_items)} valid / {len(test_items)} test patches.")
     log("Step 1/4: Converting whole-slide patches into tensor batches.")
 

@@ -1,0 +1,2 @@
+Configuration,Classifier,LoRA,Accuracy,F1-Score,Kappa,AUC
+linear_cls,linear,No,70.26 ± 0.00,62.00 ± 0.00,0.686 ± 0.000,0.886 ± 0.000

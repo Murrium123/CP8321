@@ -1,0 +1,17 @@
+{
+  "start_time": "2025-11-16T08:33:06.460574",
+  "end_time": "2025-11-16T08:48:30.611242",
+  "total_duration_minutes": 15.402511133333332,
+  "encoder": "facebook/dinov2-base",
+  "configurations_run": 1,
+  "successful": 1,
+  "failed": 0,
+  "results": [
+    {
+      "config": "linear_cls",
+      "success": true,
+      "duration_minutes": 15.402508633333333,
+      "error": null
+    }
+  ]
+}

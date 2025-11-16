@@ -1,7 +1,27 @@
+# Core scientific computing
 numpy>=1.24
+pandas>=2.0
+openpyxl>=3.1  # Required for pandas to read Excel files
+
+# Machine learning
 scikit-learn>=1.4
+
+# Deep learning
 torch>=2.2
+torchvision>=0.17
+
+# Computer vision and image processing
 pillow>=10.0
+timm>=0.9  # PyTorch Image Models
+
+# Hugging Face ecosystem
 transformers>=4.39
 huggingface-hub>=0.23
-peft>=0.10
+peft>=0.10  # Parameter-Efficient Fine-Tuning (LoRA)
+
+# Visualization
+matplotlib>=3.8
+seaborn>=0.13
+
+# Utilities
+tqdm>=4.66  # Progress bars

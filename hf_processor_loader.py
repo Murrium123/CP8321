@@ -1,131 +1,160 @@
 """
-Helpers for loading Hugging Face vision encoders and their image processors.
+Utilities for loading Hugging Face image processors with graceful fallbacks.
 
-The training scripts assume two utilities:
-* ``load_auto_model`` – returns a torch.nn.Module encoder given a checkpoint
-* ``load_image_processor`` – returns a callable that prepares PIL images
-
-This module keeps the logic in one place and adds a lightweight fallback
-processor so the training script can still run when a pretrained processor
-is not available (e.g., for custom/timm checkpoints stored locally).
+Some checkpoints (e.g., BiomedCLIP) ship without ``preprocessor_config.json``,
+which makes ``AutoImageProcessor`` fail. This helper tries the standard loader
+first and then falls back to ``AutoProcessor`` or ``CLIPImageProcessor`` so
+callers always get an object that can turn images into ``pixel_values``.
 """
 
 from __future__ import annotations
 
-from functools import lru_cache
+import shutil
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Dict, List
 
-import numpy as np
 import torch
-from PIL import Image
 
-try:  # Pillow < 10 compatibility
-    Resampling = Image.Resampling
-except AttributeError:  # pragma: no cover
-    Resampling = Image
+try:
+    from transformers import AutoImageProcessor, AutoProcessor, CLIPImageProcessor, AutoModel
+except ImportError:  # pragma: no cover - handled at runtime on systems w/out transformers
+    AutoImageProcessor = None  # type: ignore
+    AutoProcessor = None  # type: ignore
+    CLIPImageProcessor = None  # type: ignore
+    AutoModel = None  # type: ignore
 
-try:  # The try/except lets us fail gracefully if transformers is missing.
-    from transformers import (
-        AutoFeatureExtractor,
-        AutoImageProcessor,
-        AutoModel,
-        AutoProcessor,
-    )
-except ImportError as exc:  # pragma: no cover
+try:
+    from huggingface_hub import hf_hub_download
+except ImportError:  # pragma: no cover
+    hf_hub_download = None  # type: ignore
+
+try:
+    import timm
+    from timm.layers import SwiGLU, GluMlp
+except ImportError:  # pragma: no cover
+    timm = None  # type: ignore
+    SwiGLU = None  # type: ignore
+    GluMlp = None  # type: ignore
+
+
+def _append_error(errors: List[str], source: str, exc: Exception) -> None:
+    errors.append(f"{source}: {exc}")
+
+
+def load_image_processor(checkpoint: str) -> Any:
+    """Return an image processor for ``checkpoint`` with CLIP-friendly fallbacks."""
+    if AutoImageProcessor is None and AutoProcessor is None and CLIPImageProcessor is None:
+        raise RuntimeError("transformers is required to load Hugging Face encoders.")
+
+    errors: List[str] = []
+
+    if AutoImageProcessor is not None:
+        try:
+            return AutoImageProcessor.from_pretrained(checkpoint)
+        except Exception as exc:  # pragma: no cover - relies on external checkpoints
+            _append_error(errors, "AutoImageProcessor", exc)
+
+    if AutoProcessor is not None:
+        try:
+            return AutoProcessor.from_pretrained(checkpoint)
+        except Exception as exc:  # pragma: no cover - relies on external checkpoints
+            _append_error(errors, "AutoProcessor", exc)
+
+    if CLIPImageProcessor is not None:
+        try:
+            return CLIPImageProcessor.from_pretrained(checkpoint)
+        except Exception as exc:  # pragma: no cover - relies on external checkpoints
+            _append_error(errors, "CLIPImageProcessor", exc)
+
     raise RuntimeError(
-        "The 'transformers' package is required to run this project. "
-        "Install it via `pip install transformers`."
-    ) from exc
+        f"Unable to load an image processor for '{checkpoint}'. "
+        f"Tried: {' | '.join(errors) if errors else 'no loaders available.'}"
+    )
 
 
-def _resolve_checkpoint_path(checkpoint: str) -> str:
-    """Return a path string that AutoModel can understand."""
-    path = Path(checkpoint).expanduser()
-    if path.exists():
-        return str(path)
-    return checkpoint
+CUSTOM_WEIGHT_FILES: Dict[str, str] = {
+    # Microsoft BiomedCLIP repo exposes `open_clip_pytorch_model.bin` instead of pytorch_model.bin
+    "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224": "open_clip_pytorch_model.bin",
+    "microsoft/BiomedCLIP-CLIP-ViT-B-16": "open_clip_pytorch_model.bin",
+}
+
+CUSTOM_CONFIG_FILES: Dict[str, str] = {
+    "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224": "open_clip_config.json",
+    "microsoft/BiomedCLIP-CLIP-ViT-B-16": "open_clip_config.json",
+}
 
 
-@lru_cache(maxsize=None)
-def load_auto_model(checkpoint: str):
-    """
-    Load a vision encoder backbone.
+def load_auto_model(checkpoint: str, **kwargs: Any):
+    """Load Hugging Face models with remote-code support enabled by default, or timm models for local paths."""
+    # Check if this is a local path with timm-style config
+    checkpoint_path = Path(checkpoint)
+    if checkpoint_path.exists() and checkpoint_path.is_dir():
+        config_file = checkpoint_path / "config.json"
+        if config_file.exists():
+            import json
+            with open(config_file) as f:
+                config = json.load(f)
+            # Check if this is a timm model (has architecture field or reg_tokens in model_args)
+            if "architecture" in config and timm is not None:
+                if "model_args" in config and "reg_tokens" in config["model_args"]:
+                    # Load with timm for custom architectures like Virchow2
+                    print(f"Loading timm model from {checkpoint}")
+                    model_name = config["architecture"]
+                    model_args = config.get("model_args", {})
+                    weights_file = checkpoint_path / "pytorch_model.bin"
 
-    The function memoizes the result so repeated calls do not re-download the
-    weights. ``trust_remote_code`` is enabled to support custom HF repos such
-    as BiomedCLIP.
-    """
-    resolved = _resolve_checkpoint_path(checkpoint)
+                    # Create model with timm - check if SwiGLU is needed based on MLP ratio
+                    mlp_ratio = model_args.get("mlp_ratio", 4.0)
+                    # SwiGLU uses mlp_layer that gates, so effective ratio is higher
+                    # For Virchow2: 6832 / 1280 = 5.3375, and fc2 takes 3416 (half of 6832)
+                    # This indicates SwiGLU with a "gated" mlp
+                    model_kwargs = {
+                        "pretrained": False,
+                        "num_classes": model_args.get("num_classes", 0),
+                        "img_size": model_args.get("img_size", 224),
+                        "init_values": model_args.get("init_values", 1e-5),
+                        "reg_tokens": model_args.get("reg_tokens", 0),
+                        "mlp_ratio": mlp_ratio,
+                        "global_pool": model_args.get("global_pool", ""),
+                        "dynamic_img_size": model_args.get("dynamic_img_size", True),
+                        "act_layer": "silu",  # SwiGLU uses SiLU activation
+                    }
+
+                    # Add GluMlp for models with mlp_ratio > 5 (indicates gated MLP)
+                    if mlp_ratio > 5.0 and GluMlp is not None:
+                        model_kwargs["mlp_layer"] = GluMlp
+
+                    model = timm.create_model(model_name, **model_kwargs)
+
+                    # Load weights
+                    if weights_file.exists():
+                        state_dict = torch.load(weights_file, map_location="cpu")
+                        model.load_state_dict(state_dict, strict=False)
+
+                    return model
+
+    # Fall back to transformers AutoModel
+    if AutoModel is None:
+        raise RuntimeError("transformers is required to load Hugging Face encoders.")
+
+    kwargs.setdefault("trust_remote_code", True)
     try:
-        return AutoModel.from_pretrained(resolved, trust_remote_code=True)
-    except OSError as exc:
-        raise RuntimeError(
-            f"Unable to load encoder from '{checkpoint}'. "
-            "Make sure the checkpoint exists locally or on Hugging Face Hub."
-        ) from exc
-
-
-class _BasicImageProcessor:
-    """
-    Minimal processor used when a pretrained processor config is unavailable.
-
-    It performs resize → tensor conversion → normalization so callers receive
-    a dict with ``pixel_values`` similar to HF processors.
-    """
-
-    def __init__(self, size: int = 224):
-        self.size = size
-        # Standard ImageNet normalization used by most ViTs.
-        self.mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-        self.std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
-
-    def _prepare(self, image: Image.Image, size: Optional[Dict[str, int]]):
-        width = size.get("width", self.size) if size else self.size
-        height = size.get("height", self.size) if size else self.size
-        resized = image.resize((width, height), Resampling.BILINEAR)
-        array = np.asarray(resized, dtype=np.float32) / 255.0
-        tensor = torch.from_numpy(array).permute(2, 0, 1)
-        tensor = (tensor - self.mean) / self.std
-        return tensor
-
-    def __call__(
-        self,
-        images: Image.Image,
-        return_tensors: str = "pt",
-        size: Optional[Dict[str, int]] = None,
-        **_: Any,
-    ) -> Dict[str, torch.Tensor]:
-        if not isinstance(images, Image.Image):
-            raise TypeError("Expected a PIL.Image input for the basic processor.")
-        tensor = self._prepare(images, size)
-        if return_tensors == "pt":
-            return {"pixel_values": tensor.unsqueeze(0)}
-        raise ValueError("Only return_tensors='pt' is supported in the fallback processor.")
-
-
-def _try_loader(loader: Callable[..., Any], checkpoint: str):
-    try:
-        return loader(checkpoint, trust_remote_code=True)
-    except (OSError, ValueError):
-        return None
-
-
-@lru_cache(maxsize=None)
-def load_image_processor(checkpoint: str):
-    """
-    Load the processor responsible for turning PIL images into tensors.
-
-    Falls back to a simple ImageNet-style processor when the checkpoint
-    does not ship with its own processor configuration (common for custom
-    timm checkpoints stored locally).
-    """
-    resolved = _resolve_checkpoint_path(checkpoint)
-
-    for loader in (AutoImageProcessor, AutoProcessor, AutoFeatureExtractor):
-        processor = _try_loader(loader.from_pretrained, resolved)
-        if processor is not None:
-            return processor
-
-    # Fall back to a basic processor so downstream code can continue to run.
-    return _BasicImageProcessor()
+        return AutoModel.from_pretrained(checkpoint, **kwargs)
+    except EnvironmentError as exc:
+        custom_file = CUSTOM_WEIGHT_FILES.get(checkpoint)
+        if not custom_file:
+            raise
+        if hf_hub_download is None:
+            raise
+        resolved_path = hf_hub_download(checkpoint, custom_file)
+        snapshot_dir = Path(resolved_path).parent
+        target_file = snapshot_dir / "pytorch_model.bin"
+        if not target_file.exists():
+            shutil.copy(resolved_path, target_file)
+        custom_cfg = CUSTOM_CONFIG_FILES.get(checkpoint)
+        if custom_cfg:
+            cfg_path = hf_hub_download(checkpoint, custom_cfg)
+            target_cfg = snapshot_dir / "config.json"
+            if not target_cfg.exists():
+                shutil.copy(cfg_path, target_cfg)
+        return AutoModel.from_pretrained(str(snapshot_dir), **kwargs)
