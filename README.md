@@ -61,8 +61,8 @@ The `requirements.txt` includes:
 Edit the paths in `organize_sicapv2_4fold.py`:
 
 ```python
-SICAP_ROOT = '/path/to/your/SICAPv2'      # Update this
-OUTPUT_DIR = '/path/to/output/data'       # Update this
+SICAP_ROOT = '/path/to/your/SICAPv2'      # Update this on line 32
+OUTPUT_DIR = '/path/to/output/data'       # Update this on line 34
 ```
 
 Then run the organization script:
