@@ -29,9 +29,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 # Paths
-SICAP_ROOT = './SICAPv2'  # Path to your SICAPv2 dataset directory
+SICAP_ROOT = './SICAPv2'  # Path to your SICAPv2 dataset directory on line 34
 IMAGES_DIR = os.path.join(SICAP_ROOT, 'images')
-OUTPUT_DIR = './data'  # Output directory for organized data
+OUTPUT_DIR = './data'  # Output directory for organized data on line 36
 
 # Main test set (same for all folds)
 TEST_FILE = os.path.join(SICAP_ROOT, 'partition/Test/Test.xlsx')
