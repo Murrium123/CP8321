@@ -1,0 +1,23 @@
+{
+  "start_time": "2025-11-23T20:13:28.177832",
+  "end_time": "2025-11-24T17:49:46.375664",
+  "total_duration_minutes": 1296.3032972,
+  "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+  "configurations_run": 2,
+  "successful": 2,
+  "failed": 0,
+  "results": [
+    {
+      "config": "linear_cls",
+      "success": true,
+      "duration_minutes": 608.2811212333332,
+      "error": null
+    },
+    {
+      "config": "linear_cls_lora",
+      "success": true,
+      "duration_minutes": 688.0220772333333,
+      "error": null
+    }
+  ]
+}

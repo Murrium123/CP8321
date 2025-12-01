@@ -1,0 +1,13 @@
+\begin{table}[htbp]
+\centering
+\caption{Foundation Model Grid Search Results on SICAPv2 (Cross-Validation)}
+\label{tab:grid_search_results}
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Configuration} & \textbf{Classifier} & \textbf{LoRA} & \textbf{Accuracy (\%)} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{F1-Score (\%)} & \textbf{Kappa} & \textbf{AUC} \\
+\midrule
+Linear Cls Lora & LINEAR & \checkmark & 84.73 $\pm$ 1.70 & 83.60 $\pm$ 2.18 & 81.94 $\pm$ 2.57 & 82.37 $\pm$ 1.91 & 0.902 $\pm$ 0.009 & 0.962 $\pm$ 0.006 \\
+Linear Cls & LINEAR & --- & 67.30 $\pm$ 0.61 & 65.39 $\pm$ 1.74 & 59.11 $\pm$ 1.50 & 60.31 $\pm$ 1.88 & 0.712 $\pm$ 0.008 & 0.878 $\pm$ 0.004 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,6 +1,25 @@
 # CP8321 Project 4: Foundation Models for Prostate Cancer Grading
 
-End-to-end pipeline for evaluating foundation models on the SICAPv2 dataset with 4-fold cross-validation. This project tests multiple vision encoders (Dinov2, PHIKON, BiomedCLIP, UNI, Virchow2) with various classifier heads for Gleason grading.
+End-to-end pipeline for evaluating foundation models on the SICAPv2 dataset with 4-fold cross-validation. This project tests multiple vision encoders (Dinov2, PHIKON, UNI, Virchow2) with various classifier heads for Gleason grading.
+
+## Quick Command Reference
+
+```bash
+# 1. Install dependencies
+python -m pip install -r requirements.txt
+
+# 2. Organize dataset
+python organize_sicapv2_4fold.py
+
+# 3. Run experiments
+python p4_driver.py --experiments A --folds 1              # Quick test (Experiment A, fold 1)
+python p4_driver.py --experiments A,B --folds 1,2,3,4      # Full baseline comparison
+python p4_driver.py --experiments C1,C2 --folds 1          # LoRA experiments
+python p4_driver.py                                         # Run ALL experiments
+
+# 4. Direct training (advanced)
+python p4_end2end_explained_simple.py --encoder facebook/dinov2-base --classifier linear --data-dir data/fold1
+```
 
 ## Prerequisites
 
@@ -96,19 +115,20 @@ data/
 
 ### Step 4: Run Your First Experiment
 
-Start with a small experiment to verify everything works. The grid search script has an **interactive menu** that guides you through configuration:
+Start with a small experiment to verify everything works. The driver script runs pre-defined experiments:
 
 ```bash
-python run_grid_search.py
+python p4_driver.py --experiments A --folds 1
 ```
 
-**Recommended first experiment:**
-- **Encoder**: `facebook/dinov2-base` (smallest, fastest)
-- **Configurations**: Select `1` (linear classifier only)
-- **Folds**: Select `1` (single fold for quick test)
-- **Parameters**: Use defaults (epochs=6, batch_size=16, lr=1e-4)
+**What this does:**
+- Runs **Experiment A** (Dinov2-Base baseline)
+- Tests 3 configurations: linear, MLP, and Random Forest classifiers
+- Tests both CLS and mean pooling
+- Uses only **Fold 1** for quick validation
+- Should complete in **~30-40 minutes** on GPU
 
-This will take approximately **20-30 minutes** and verify:
+This verifies:
 - Dataset is properly organized
 - Dependencies are correctly installed
 - GPU/CPU is working
@@ -116,114 +136,135 @@ This will take approximately **20-30 minutes** and verify:
 
 **Expected output:**
 ```
-================================================================================
-STEP 1: SELECT ENCODER
-================================================================================
-Available Encoders:
-  1. Dinov2-Base (86M params, general purpose vision)
-  2. Dinov2-Small (22M params, general purpose vision)
-  3. Phikon (86M params, medical imaging Vision Transformer)
-  4. BiomedCLIP (86M params, biomedical Vision Transformer)
-  5. UNI (1.1B params, Histopathology Foundation Model)
-  6. Virchow2 (632M params, Histopathology Foundation Model)
-
-Select encoder [1-6]: 1
-✓ Selected: Dinov2-Base (86M params, general purpose vision)
+=== Exp A (DINO-v2 baseline), config linear_cls, pooling cls, fold 1 ===
+python p4_end2end_explained_simple.py --data-dir data/fold1 --test-dir data/test ...
 ...
+✓ Experiment completed successfully
 ```
 
 After completion, check the results:
 
 ```bash
-# View summary
-cat foundation_results/grid_search/grid_search_summary.txt
+# View fold results
+cat foundation_results/p4_driver_runs/A_cls/linear_cls/fold1_results.json
 
-# View detailed metrics
-cat foundation_results/grid_search/linear_cls/fold1_results.json
+# View all experiment outputs
+ls -R foundation_results/p4_driver_runs/
 ```
 
 ## Running Full Experiments
 
 Once your first experiment succeeds, scale up to comprehensive evaluations:
 
-### Full 4-Fold Cross-Validation
+### Available Pre-Defined Experiments
 
-Run all configurations on all 4 folds:
+The driver includes several carefully designed experiments:
+
+- **Experiment A**: Dinov2-Base baseline (linear, MLP, RF classifiers)
+- **Experiment B**: Phikon baseline (linear, MLP classifiers)
+- **Experiment C1**: Dinov2-Base LoRA vs frozen comparison
+- **Experiment C2**: Phikon LoRA vs frozen comparison
+- **Experiment C3**: UNI LoRA vs frozen comparison (requires local model)
+- **Experiment C4**: Virchow2 LoRA vs frozen comparison (requires local model)
+
+### Run All Experiments on All Folds
 
 ```bash
-python run_grid_search.py
+# Run everything (all experiments, all 4 folds)
+python p4_driver.py
 ```
 
-Select:
-- Encoder of your choice
-- **a** (all configurations)
-- **4** (all 4 folds)
+This will execute all experiments across all 4 folds. Estimated time: **6-12 hours** depending on GPU.
 
-This tests 6 configurations × 4 folds = **24 total runs**:
-1. `linear_cls` - Linear classifier
-2. `linear_cls_lora` - Linear classifier + LoRA fine-tuning
-3. `mlp_cls` - MLP classifier (2-layer)
-4. `mlp_cls_lora` - MLP classifier + LoRA fine-tuning
-5. `rf_cls` - Random Forest (200 trees)
-6. `svm_cls` - SVM with RBF kernel
-
-**Time estimates (Dinov2-Base on GPU):**
-- Single fold: ~20-30 min
-- Full 4-fold CV: ~80-120 min
-
-### Non-Interactive Mode
-
-For scripting or running on remote servers:
+### Run Specific Experiments
 
 ```bash
-# Run specific configurations on specific folds
-python run_grid_search.py \
-  --encoder facebook/dinov2-base \
-  --configs "linear_cls,rf_cls" \
-  --folds "1,2,3,4" \
-  --epochs 6 \
-  --batch-size 16 \
-  --non-interactive
+# Run just Experiment A on all 4 folds
+python p4_driver.py --experiments A --folds 1,2,3,4
 
-# Run all configs on fold 1 only
-python run_grid_search.py \
-  --encoder owkin/phikon \
-  --folds "1" \
-  --epochs 6 \
-  --non-interactive
+# Run Experiments C1 and C2 on fold 1 only
+python p4_driver.py --experiments C1,C2 --folds 1
+
+# Run Experiment B with custom hyperparameters
+python p4_driver.py --experiments B --epochs 10 --batch-size 32 --lr 5e-5
+```
+
+### Customize Hyperparameters
+
+```bash
+# Adjust LoRA parameters for all experiments
+python p4_driver.py \
+  --experiments C1,C2 \
+  --lora-rank 16 \
+  --lora-alpha 32 \
+  --lora-dropout 0.1
+
+# Use early stopping
+python p4_driver.py \
+  --experiments A \
+  --early-stop-patience 2 \
+  --early-stop-metric f1_macro
 ```
 
 ## Understanding the Results
 
-After a successful grid search, you'll get:
+After running experiments with `p4_driver.py`, results are organized by experiment and configuration:
 
-1. **Summary Table** (`grid_search_summary.txt`)
-   - Performance comparison across all configurations
-   - Mean ± std for accuracy, F1, kappa, AUC
+```
+foundation_results/p4_driver_runs/
+├── A_cls/                    # Experiment A with CLS pooling
+│   ├── linear_cls/
+│   │   ├── fold1_results.json
+│   │   ├── fold2_results.json
+│   │   ├── fold3_results.json
+│   │   ├── fold4_results.json
+│   │   └── 4fold_summary.json
+│   ├── mlp_cls/
+│   └── rf_cls/
+├── A_mean/                   # Experiment A with mean pooling
+│   ├── linear_cls/
+│   ├── mlp_cls/
+│   └── rf_cls/
+├── C1_cls/                   # Experiment C1 (LoRA comparison)
+│   ├── linear_cls/
+│   └── linear_cls_lora/
+└── ...
+```
 
-2. **Confusion Matrices** (`confusion_matrices.png`)
-   - Visual comparison of classification patterns
-   - Averaged across folds
+### Pre-Existing Results
 
-3. **Metric Comparison Charts** (`metric_comparisons.png`)
-   - Bar charts comparing accuracy, F1, kappa, AUC
-   - Color-coded by LoRA usage
+**Note**: This repository includes pre-computed results in the `run_results/` directory from previous experimental runs. These results follow the same structure as above and include:
+- Experiments A and B (baseline comparisons)
+- Experiments D1-D5 (additional model evaluations)
+- Complete 4-fold cross-validation results for each configuration
 
-4. **LaTeX Table** (`results_table.tex`)
-   - Ready to paste into your paper
+You can examine these results without re-running experiments:
+```bash
+# View a completed experiment
+cat run_results/A_cls/linear_cls/4fold_summary.json
 
-5. **Individual Fold Results** (per config folder)
-   - `fold1_results.json`, `fold2_results.json`, etc.
-   - Detailed metrics, confusion matrices, predictions
+# List all available pre-computed results
+ls -R run_results/
+```
+
+### Individual Fold Results
+
+Each `fold*_results.json` file contains:
+- **Metrics**: Accuracy, F1 (macro/weighted), Cohen's Kappa, AUC
+- **Confusion Matrix**: Per-class predictions
+- **Test Predictions**: Model outputs for test set
+- **Training History**: Loss and validation metrics per epoch
+
+Each configuration also includes a `4fold_summary.json` with aggregated statistics across all folds.
 
 ## Advanced Usage
 
-### Single Model Evaluation
+### Direct Single Model Evaluation
 
-To test a single configuration without grid search:
+You can bypass the driver and call the training script directly for custom experiments:
 
 ```bash
-python p4_end2end_explained.py \
+python p4_end2end_explained_simple.py \
   --data-dir data/fold1 \
   --test-dir data/test \
   --encoder facebook/dinov2-base \
@@ -231,70 +272,85 @@ python p4_end2end_explained.py \
   --pooling cls \
   --epochs 6 \
   --batch-size 16 \
-  --output-json results/my_experiment.json
+  --lr 1e-4 \
+  --output-json results/custom_experiment.json
 ```
 
-### Testing Different Encoders
+### Available Encoders
 
-Available encoders:
+The code supports these foundation models:
 - `facebook/dinov2-base` - General-purpose vision (86M params)
 - `facebook/dinov2-small` - Smaller version (22M params)
 - `owkin/phikon` - Medical imaging specialist (86M params)
 - `ikim-uk-essen/BiomedCLIP_ViT_patch16_224` - Biomedical vision (86M params)
-- Local paths for UNI and Virchow2 (see `run_grid_search.py`)
+- Local paths for UNI (1.1B params) and Virchow2 (632M params) - see `p4_driver.py` for paths
 
-### Adjusting Hyperparameters
-
-For LoRA fine-tuning:
+### Custom Experiments with LoRA
 
 ```bash
-python p4_end2end_explained.py \
+python p4_end2end_explained_simple.py \
+  --data-dir data/fold1 \
   --encoder facebook/dinov2-base \
-  --classifier linear \
+  --classifier mlp \
   --use-lora \
-  --lora-rank 8 \
-  --lora-alpha 16 \
-  --lora-dropout 0.05 \
-  --epochs 6
+  --lora-rank 16 \
+  --lora-alpha 32 \
+  --lora-dropout 0.1 \
+  --epochs 10 \
+  --early-stop-patience 2
 ```
 
-For sklearn classifiers:
+### Using Different Classifiers
 
 ```bash
-# Random Forest
-python p4_end2end_explained.py \
+# Random Forest (sklearn)
+python p4_end2end_explained_simple.py \
+  --encoder owkin/phikon \
   --classifier rf \
   --rf-estimators 200
 
-# SVM
-python p4_end2end_explained.py \
-  --classifier svm \
-  --svm-c 1.0
+# MLP with 2 hidden layers
+python p4_end2end_explained_simple.py \
+  --encoder facebook/dinov2-base \
+  --classifier mlp \
+  --pooling mean
 ```
 
 ## Project Structure
 
 ```
 CP8321/
-├── requirements.txt              # All Python dependencies
-├── organize_sicapv2_4fold.py     # Dataset organization for 4-fold CV
-├── p4_end2end_explained.py       # Single-run pipeline (heavily commented)
-├── run_grid_search.py            # Grid search with interactive menu
-├── hf_processor_loader.py        # Utilities for loading HF models
-└── foundation_results/           # Output directory
-    └── grid_search/
-        ├── grid_search_summary.txt
-        ├── grid_search_summary.csv
-        ├── confusion_matrices.png
-        ├── metric_comparisons.png
-        ├── results_table.tex
-        ├── grid_search_log.json
-        └── [config_name]/
-            ├── fold1_results.json
-            ├── fold2_results.json
-            ├── fold3_results.json
-            ├── fold4_results.json
-            └── 4fold_summary.json
+├── requirements.txt                    # All Python dependencies
+├── organize_sicapv2_4fold.py           # Dataset organization for 4-fold CV
+├── p4_driver.py                        # Main experiment driver with pre-defined experiments
+├── p4_end2end_explained_simple.py      # Core training pipeline (called by driver)
+├── hf_processor_loader.py              # Utilities for loading HF models and processors
+├── data/                               # Organized dataset (created by organize script)
+│   ├── test/                          # Shared test set
+│   ├── fold1/
+│   ├── fold2/
+│   ├── fold3/
+│   └── fold4/
+├── run_results/                        # Pre-computed results from previous runs
+│   ├── A_cls/                         # Dinov2-Base baseline (CLS pooling)
+│   ├── A_mean/                        # Dinov2-Base baseline (mean pooling)
+│   ├── B_cls/                         # Phikon baseline (CLS pooling)
+│   ├── B_mean/                        # Phikon baseline (mean pooling)
+│   └── D1_cls/ ... D5_cls/            # Additional experiments
+└── foundation_results/                 # New experiment outputs (created when you run p4_driver.py)
+    └── p4_driver_runs/
+        ├── A_cls/                     # Experiment A with CLS pooling
+        │   ├── linear_cls/
+        │   │   ├── fold1_results.json
+        │   │   ├── fold2_results.json
+        │   │   ├── fold3_results.json
+        │   │   ├── fold4_results.json
+        │   │   └── 4fold_summary.json
+        │   ├── mlp_cls/
+        │   └── rf_cls/
+        ├── A_mean/                    # Experiment A with mean pooling
+        ├── C1_cls/                    # LoRA comparison experiments
+        └── ...
 ```
 
 ## Troubleshooting

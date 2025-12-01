@@ -1,0 +1,42 @@
+{
+  "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+  "use_lora": true,
+  "classifier": "linear",
+  "pooling": "cls",
+  "epochs": 10,
+  "batch_size": 16,
+  "test_metrics": {
+    "accuracy": 0.5226201696512723,
+    "precision_macro": 0.31651235122157734,
+    "recall_macro": 0.37795411763487385,
+    "f1_macro": 0.31183965396655333,
+    "kappa_quadratic": 0.4444868135010329,
+    "confusion_matrix": [
+      [
+        542,
+        3,
+        99,
+        0
+      ],
+      [
+        240,
+        4,
+        149,
+        0
+      ],
+      [
+        279,
+        11,
+        563,
+        0
+      ],
+      [
+        51,
+        1,
+        180,
+        0
+      ]
+    ],
+    "auc_weighted": 0.7128497986191887
+  }
+}

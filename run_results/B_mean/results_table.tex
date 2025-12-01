@@ -1,0 +1,13 @@
+\begin{table}[htbp]
+\centering
+\caption{Foundation Model Grid Search Results on SICAPv2 (Cross-Validation)}
+\label{tab:grid_search_results}
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Configuration} & \textbf{Classifier} & \textbf{LoRA} & \textbf{Accuracy (\%)} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{F1-Score (\%)} & \textbf{Kappa} & \textbf{AUC} \\
+\midrule
+Mlp Cls Mean & MLP & --- & 71.48 $\pm$ 1.81 & 69.69 $\pm$ 1.88 & 63.11 $\pm$ 1.50 & 64.10 $\pm$ 1.82 & 0.767 $\pm$ 0.023 & 0.902 $\pm$ 0.010 \\
+Linear Cls Mean & LINEAR & --- & 70.13 $\pm$ 1.69 & 70.49 $\pm$ 2.63 & 59.61 $\pm$ 2.57 & 60.86 $\pm$ 3.30 & 0.736 $\pm$ 0.022 & 0.890 $\pm$ 0.010 \\
+\bottomrule
+\end{tabular}
+\end{table}

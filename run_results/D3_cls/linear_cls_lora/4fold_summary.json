@@ -1,0 +1,388 @@
+{
+  "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+  "classifier": "linear",
+  "use_lora": true,
+  "num_folds": 4,
+  "aggregated_metrics": {
+    "accuracy": {
+      "mean": 0.5259189443920829,
+      "std": 0.009669314103997748,
+      "values": [
+        0.5424128180961357,
+        0.5207351555136663,
+        0.5226201696512723,
+        0.5179076343072573
+      ]
+    },
+    "precision_macro": {
+      "mean": 0.36254663201317533,
+      "std": 0.11984728492131246,
+      "values": [
+        0.5665468778823242,
+        0.3084795924419774,
+        0.31651235122157734,
+        0.2586477065068225
+      ]
+    },
+    "recall_macro": {
+      "mean": 0.3801820971142361,
+      "std": 0.00853009547471284,
+      "values": [
+        0.39393490554087185,
+        0.3783270885523716,
+        0.37795411763487385,
+        0.37051227672882703
+      ]
+    },
+    "f1_macro": {
+      "mean": 0.31709991430458556,
+      "std": 0.010832684960121882,
+      "values": [
+        0.3329771635789244,
+        0.3199544659407002,
+        0.31183965396655333,
+        0.30362837373216434
+      ]
+    },
+    "kappa_quadratic": {
+      "mean": 0.4498717672773858,
+      "std": 0.022479565240661276,
+      "values": [
+        0.4848316611727066,
+        0.4479837732493298,
+        0.4444868135010329,
+        0.4221848211864738
+      ]
+    },
+    "auc_weighted": {
+      "mean": 0.7227048208970392,
+      "std": 0.017440169516519173,
+      "values": [
+        0.7486979211427569,
+        0.7271588914776339,
+        0.7128497986191887,
+        0.7021126723485773
+      ]
+    }
+  },
+  "individual_folds": [
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.5424128180961357,
+        "precision_macro": 0.5665468778823242,
+        "recall_macro": 0.39393490554087185,
+        "f1_macro": 0.3329771635789244,
+        "kappa_quadratic": 0.4848316611727066,
+        "confusion_matrix": [
+          [
+            544,
+            2,
+            98,
+            0
+          ],
+          [
+            228,
+            5,
+            160,
+            0
+          ],
+          [
+            235,
+            20,
+            598,
+            0
+          ],
+          [
+            45,
+            2,
+            181,
+            4
+          ]
+        ],
+        "auc_weighted": 0.7486979211427569
+      },
+      "fold": 1
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.5207351555136663,
+        "precision_macro": 0.3084795924419774,
+        "recall_macro": 0.3783270885523716,
+        "f1_macro": 0.3199544659407002,
+        "kappa_quadratic": 0.4479837732493298,
+        "confusion_matrix": [
+          [
+            533,
+            16,
+            95,
+            0
+          ],
+          [
+            241,
+            11,
+            141,
+            0
+          ],
+          [
+            264,
+            28,
+            561,
+            0
+          ],
+          [
+            48,
+            12,
+            172,
+            0
+          ]
+        ],
+        "auc_weighted": 0.7271588914776339
+      },
+      "fold": 2
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.5226201696512723,
+        "precision_macro": 0.31651235122157734,
+        "recall_macro": 0.37795411763487385,
+        "f1_macro": 0.31183965396655333,
+        "kappa_quadratic": 0.4444868135010329,
+        "confusion_matrix": [
+          [
+            542,
+            3,
+            99,
+            0
+          ],
+          [
+            240,
+            4,
+            149,
+            0
+          ],
+          [
+            279,
+            11,
+            563,
+            0
+          ],
+          [
+            51,
+            1,
+            180,
+            0
+          ]
+        ],
+        "auc_weighted": 0.7128497986191887
+      },
+      "fold": 3
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/UNI_model",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.5179076343072573,
+        "precision_macro": 0.2586477065068225,
+        "recall_macro": 0.37051227672882703,
+        "f1_macro": 0.30362837373216434,
+        "kappa_quadratic": 0.4221848211864738,
+        "confusion_matrix": [
+          [
+            509,
+            0,
+            135,
+            0
+          ],
+          [
+            215,
+            0,
+            178,
+            0
+          ],
+          [
+            263,
+            0,
+            590,
+            0
+          ],
+          [
+            49,
+            0,
+            183,
+            0
+          ]
+        ],
+        "auc_weighted": 0.7021126723485773
+      },
+      "fold": 4
+    }
+  ],
+  "confusion_matrices": {
+    "average": [
+      [
+        532.0,
+        5.25,
+        106.75,
+        0.0
+      ],
+      [
+        231.0,
+        5.0,
+        157.0,
+        0.0
+      ],
+      [
+        260.25,
+        14.75,
+        578.0,
+        0.0
+      ],
+      [
+        48.25,
+        3.75,
+        179.0,
+        1.0
+      ]
+    ],
+    "per_fold": [
+      {
+        "fold": 1,
+        "matrix": [
+          [
+            544,
+            2,
+            98,
+            0
+          ],
+          [
+            228,
+            5,
+            160,
+            0
+          ],
+          [
+            235,
+            20,
+            598,
+            0
+          ],
+          [
+            45,
+            2,
+            181,
+            4
+          ]
+        ]
+      },
+      {
+        "fold": 2,
+        "matrix": [
+          [
+            533,
+            16,
+            95,
+            0
+          ],
+          [
+            241,
+            11,
+            141,
+            0
+          ],
+          [
+            264,
+            28,
+            561,
+            0
+          ],
+          [
+            48,
+            12,
+            172,
+            0
+          ]
+        ]
+      },
+      {
+        "fold": 3,
+        "matrix": [
+          [
+            542,
+            3,
+            99,
+            0
+          ],
+          [
+            240,
+            4,
+            149,
+            0
+          ],
+          [
+            279,
+            11,
+            563,
+            0
+          ],
+          [
+            51,
+            1,
+            180,
+            0
+          ]
+        ]
+      },
+      {
+        "fold": 4,
+        "matrix": [
+          [
+            509,
+            0,
+            135,
+            0
+          ],
+          [
+            215,
+            0,
+            178,
+            0
+          ],
+          [
+            263,
+            0,
+            590,
+            0
+          ],
+          [
+            49,
+            0,
+            183,
+            0
+          ]
+        ]
+      }
+    ]
+  }
+}

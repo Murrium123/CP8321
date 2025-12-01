@@ -1,0 +1,388 @@
+{
+  "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+  "classifier": "linear",
+  "use_lora": true,
+  "num_folds": 4,
+  "aggregated_metrics": {
+    "accuracy": {
+      "mean": 0.8473138548539114,
+      "std": 0.016997821674713896,
+      "values": [
+        0.8638077285579642,
+        0.8393025447690857,
+        0.8628652214891611,
+        0.8232799245994344
+      ]
+    },
+    "precision_macro": {
+      "mean": 0.8360396989133463,
+      "std": 0.02180508717061999,
+      "values": [
+        0.8673050799240489,
+        0.8197438914670159,
+        0.8450886027302291,
+        0.8120212215320911
+      ]
+    },
+    "recall_macro": {
+      "mean": 0.8194179339298895,
+      "std": 0.025651514001805407,
+      "values": [
+        0.8187784518988062,
+        0.8373257674760736,
+        0.8436608266299194,
+        0.7779066897147591
+      ]
+    },
+    "f1_macro": {
+      "mean": 0.82369595987227,
+      "std": 0.019128006608627728,
+      "values": [
+        0.8355804817549932,
+        0.8249879910958832,
+        0.8419451607104659,
+        0.7922702059277376
+      ]
+    },
+    "kappa_quadratic": {
+      "mean": 0.9024988093541393,
+      "std": 0.008843129936644283,
+      "values": [
+        0.9058477222869102,
+        0.8989771913264676,
+        0.9146095509383867,
+        0.8905607728647925
+      ]
+    },
+    "auc_weighted": {
+      "mean": 0.9624179707223819,
+      "std": 0.006178252455685631,
+      "values": [
+        0.9686237745003197,
+        0.9649703809301415,
+        0.9639254272056271,
+        0.9521523002534392
+      ]
+    }
+  },
+  "individual_folds": [
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.8638077285579642,
+        "precision_macro": 0.8673050799240489,
+        "recall_macro": 0.8187784518988062,
+        "f1_macro": 0.8355804817549932,
+        "kappa_quadratic": 0.9058477222869102,
+        "confusion_matrix": [
+          [
+            628,
+            0,
+            16,
+            0
+          ],
+          [
+            26,
+            251,
+            115,
+            1
+          ],
+          [
+            8,
+            22,
+            781,
+            42
+          ],
+          [
+            7,
+            0,
+            52,
+            173
+          ]
+        ],
+        "auc_weighted": 0.9686237745003197
+      },
+      "fold": 1
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.8393025447690857,
+        "precision_macro": 0.8197438914670159,
+        "recall_macro": 0.8373257674760736,
+        "f1_macro": 0.8249879910958832,
+        "kappa_quadratic": 0.8989771913264676,
+        "confusion_matrix": [
+          [
+            639,
+            1,
+            4,
+            0
+          ],
+          [
+            40,
+            319,
+            32,
+            2
+          ],
+          [
+            20,
+            152,
+            638,
+            43
+          ],
+          [
+            4,
+            0,
+            43,
+            185
+          ]
+        ],
+        "auc_weighted": 0.9649703809301415
+      },
+      "fold": 2
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.8628652214891611,
+        "precision_macro": 0.8450886027302291,
+        "recall_macro": 0.8436608266299194,
+        "f1_macro": 0.8419451607104659,
+        "kappa_quadratic": 0.9146095509383867,
+        "confusion_matrix": [
+          [
+            619,
+            5,
+            19,
+            1
+          ],
+          [
+            16,
+            282,
+            91,
+            4
+          ],
+          [
+            6,
+            43,
+            737,
+            67
+          ],
+          [
+            0,
+            0,
+            39,
+            193
+          ]
+        ],
+        "auc_weighted": 0.9639254272056271
+      },
+      "fold": 3
+    },
+    {
+      "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+      "use_lora": true,
+      "classifier": "linear",
+      "pooling": "cls",
+      "epochs": 10,
+      "batch_size": 16,
+      "test_metrics": {
+        "accuracy": 0.8232799245994344,
+        "precision_macro": 0.8120212215320911,
+        "recall_macro": 0.7779066897147591,
+        "f1_macro": 0.7922702059277376,
+        "kappa_quadratic": 0.8905607728647925,
+        "confusion_matrix": [
+          [
+            603,
+            14,
+            27,
+            0
+          ],
+          [
+            7,
+            258,
+            127,
+            1
+          ],
+          [
+            6,
+            58,
+            733,
+            56
+          ],
+          [
+            0,
+            0,
+            79,
+            153
+          ]
+        ],
+        "auc_weighted": 0.9521523002534392
+      },
+      "fold": 4
+    }
+  ],
+  "confusion_matrices": {
+    "average": [
+      [
+        622.25,
+        5.0,
+        16.5,
+        0.25
+      ],
+      [
+        22.25,
+        277.5,
+        91.25,
+        2.0
+      ],
+      [
+        10.0,
+        68.75,
+        722.25,
+        52.0
+      ],
+      [
+        2.75,
+        0.0,
+        53.25,
+        176.0
+      ]
+    ],
+    "per_fold": [
+      {
+        "fold": 1,
+        "matrix": [
+          [
+            628,
+            0,
+            16,
+            0
+          ],
+          [
+            26,
+            251,
+            115,
+            1
+          ],
+          [
+            8,
+            22,
+            781,
+            42
+          ],
+          [
+            7,
+            0,
+            52,
+            173
+          ]
+        ]
+      },
+      {
+        "fold": 2,
+        "matrix": [
+          [
+            639,
+            1,
+            4,
+            0
+          ],
+          [
+            40,
+            319,
+            32,
+            2
+          ],
+          [
+            20,
+            152,
+            638,
+            43
+          ],
+          [
+            4,
+            0,
+            43,
+            185
+          ]
+        ]
+      },
+      {
+        "fold": 3,
+        "matrix": [
+          [
+            619,
+            5,
+            19,
+            1
+          ],
+          [
+            16,
+            282,
+            91,
+            4
+          ],
+          [
+            6,
+            43,
+            737,
+            67
+          ],
+          [
+            0,
+            0,
+            39,
+            193
+          ]
+        ]
+      },
+      {
+        "fold": 4,
+        "matrix": [
+          [
+            603,
+            14,
+            27,
+            0
+          ],
+          [
+            7,
+            258,
+            127,
+            1
+          ],
+          [
+            6,
+            58,
+            733,
+            56
+          ],
+          [
+            0,
+            0,
+            79,
+            153
+          ]
+        ]
+      }
+    ]
+  }
+}

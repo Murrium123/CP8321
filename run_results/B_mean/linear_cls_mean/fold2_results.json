@@ -1,0 +1,42 @@
+{
+  "encoder": "owkin/phikon",
+  "use_lora": false,
+  "classifier": "linear",
+  "pooling": "mean",
+  "epochs": 6,
+  "batch_size": 16,
+  "test_metrics": {
+    "accuracy": 0.679076343072573,
+    "precision_macro": 0.6808597927378268,
+    "recall_macro": 0.5549518730615208,
+    "f1_macro": 0.5554749023353257,
+    "kappa_quadratic": 0.7099123452301885,
+    "confusion_matrix": [
+      [
+        559,
+        18,
+        67,
+        0
+      ],
+      [
+        78,
+        179,
+        135,
+        1
+      ],
+      [
+        76,
+        88,
+        680,
+        9
+      ],
+      [
+        8,
+        3,
+        198,
+        23
+      ]
+    ],
+    "auc_weighted": 0.8797654138381541
+  }
+}

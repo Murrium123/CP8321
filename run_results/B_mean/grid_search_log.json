@@ -1,0 +1,23 @@
+{
+  "start_time": "2025-11-23T00:34:02.017856",
+  "end_time": "2025-11-23T02:20:40.918327",
+  "total_duration_minutes": 106.64834118333333,
+  "encoder": "owkin/phikon",
+  "configurations_run": 2,
+  "successful": 2,
+  "failed": 0,
+  "results": [
+    {
+      "config": "linear_cls_mean",
+      "success": true,
+      "duration_minutes": 53.33498766666666,
+      "error": null
+    },
+    {
+      "config": "mlp_cls_mean",
+      "success": true,
+      "duration_minutes": 53.31334941666667,
+      "error": null
+    }
+  ]
+}

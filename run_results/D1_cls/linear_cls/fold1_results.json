@@ -1,0 +1,42 @@
+{
+  "encoder": "facebook/dinov2-base",
+  "use_lora": false,
+  "classifier": "linear",
+  "pooling": "cls",
+  "epochs": 6,
+  "batch_size": 16,
+  "test_metrics": {
+    "accuracy": 0.6870876531573987,
+    "precision_macro": 0.6764860683259083,
+    "recall_macro": 0.563201108713306,
+    "f1_macro": 0.5678152396472357,
+    "kappa_quadratic": 0.6710157711859364,
+    "confusion_matrix": [
+      [
+        583,
+        24,
+        35,
+        2
+      ],
+      [
+        90,
+        159,
+        140,
+        4
+      ],
+      [
+        117,
+        38,
+        683,
+        15
+      ],
+      [
+        33,
+        0,
+        166,
+        33
+      ]
+    ],
+    "auc_weighted": 0.8752667120653052
+  }
+}

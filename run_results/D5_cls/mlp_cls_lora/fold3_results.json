@@ -1,0 +1,42 @@
+{
+  "encoder": "/Users/salvatorevella/Documents/GitHub/DataScience/CP8321/Project/Virchow2",
+  "use_lora": true,
+  "classifier": "mlp",
+  "pooling": "cls",
+  "epochs": 10,
+  "batch_size": 16,
+  "test_metrics": {
+    "accuracy": 0.8600377002827522,
+    "precision_macro": 0.8491764187784445,
+    "recall_macro": 0.837381697374736,
+    "f1_macro": 0.8419761526855092,
+    "kappa_quadratic": 0.91598648182109,
+    "confusion_matrix": [
+      [
+        623,
+        4,
+        17,
+        0
+      ],
+      [
+        21,
+        270,
+        101,
+        1
+      ],
+      [
+        8,
+        62,
+        740,
+        43
+      ],
+      [
+        0,
+        0,
+        40,
+        192
+      ]
+    ],
+    "auc_weighted": 0.9627711310945795
+  }
+}
