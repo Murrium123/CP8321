@@ -48,7 +48,7 @@ def load_auto_model(checkpoint: str, **kwargs: Any):
             import json
             with open(config_file) as f:
                 config = json.load(f)
-            # Check if this is a timm model (has architecture field or reg_tokens in model_args)
+            # Check if this is a timm (PyTorch Image Model) model - Virchow2 is a timm model
             if "architecture" in config and timm is not None:
                 if "model_args" in config and "reg_tokens" in config["model_args"]:
                     # Load with timm for custom architectures like Virchow2
@@ -68,7 +68,7 @@ def load_auto_model(checkpoint: str, **kwargs: Any):
                         "mlp_ratio": mlp_ratio,
                         "global_pool": model_args.get("global_pool", ""),
                         "dynamic_img_size": model_args.get("dynamic_img_size", True),
-                        "act_layer": "silu",  # SwiGLU uses SiLU activation
+                        "act_layer": "silu",  # Good default for Virchow2
                     }
 
                     # Add GluMlp for models with mlp_ratio > 5 (indicates gated MLP)

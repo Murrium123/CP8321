@@ -85,7 +85,7 @@ def run_case(
     pooling_override: str,
     args: argparse.Namespace,
     script_path: Path,
-) -> bool:
+):
     cfg = CONFIGS[config_name]
     pooling = pooling_override or cfg["pooling"]
     classifier = cfg["classifier"]
@@ -144,12 +144,9 @@ def run_case(
 
     print(f"\n=== Exp {exp['id']} ({exp['description']}), config {config_name}, pooling {pooling}, fold {fold} ===")
     print(" ".join(cmd))
-    try:
-        subprocess.run(cmd, check=True)
-        return True
-    except subprocess.CalledProcessError as exc:
-        print(f"❌ Failed (code {exc.returncode})")
-        return False
+
+    subprocess.run(cmd, check=True)
+    return True
 
 
 def main():

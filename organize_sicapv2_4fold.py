@@ -91,7 +91,6 @@ def create_folders():
 
 # Copy the images to the proper folder. Note that we check missing but we did
 # not actually find any missing - this was defensive and for debugging
-
 def copy_images(df, destination_path, split_name):
     copied = 0
     missing = 0
