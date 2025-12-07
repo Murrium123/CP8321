@@ -55,7 +55,7 @@ Run the organization script:
 python organize_sicapv2_4fold.py
 ```
 
-### Step 4: Run Your First Experiment
+### Step 3: Run Your First Experiment
 
 Verify everything works with a quick test:
 
