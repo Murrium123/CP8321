@@ -11,4 +11,4 @@ huggingface-hub>=0.23
 peft>=0.10
 matplotlib>=3.8
 seaborn>=0.13
-tqdm>=4.66 
+tqdm>=4.66
