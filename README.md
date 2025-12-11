@@ -45,8 +45,8 @@ Download from Mendeley Data: https://data.mendeley.com/datasets/9xxm58dvs3/1
 Edit paths in `organize_sicapv2_4fold.py`:
 
 ```python
-SICAP_ROOT = '/path/to/your/SICAPv2'      # Update to your SICAPv2 location
-OUTPUT_DIR = '/path/to/output/data'       # Update to desired output location
+SICAP_ROOT = '/path/to/your/SICAPv2'      # Update to your SICAPv2 location (line 60)
+OUTPUT_DIR = '/path/to/output/data'       # Update to desired output location (line 62)
 ```
 
 Run the organization script:
